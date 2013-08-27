@@ -46,7 +46,7 @@ func NewRequestFactoryFromFile(fn string) (*RequestFactory, error) {
 func (self *RequestFactory) NewRequest(method, url string, body io.Reader) (req *http.Request, err error) {
 	if body == nil && self.template != nil {
 		vars := new(RequestBodyVars)
-		vars.Time = time.Now()
+		vars.Now = time.Now()
 		vars.Id = atomic.AddInt32(&self.nextId, 1)
 
 		buf := new(bytes.Buffer)

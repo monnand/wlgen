@@ -3,7 +3,6 @@ package main
 import (
 	"code.google.com/p/probab/dst"
 	"fmt"
-	"math/rand"
 	"strings"
 	"time"
 )
@@ -11,9 +10,6 @@ import (
 type RandomDelay struct {
 	rgen func() int64 // random number generator
 	unit string       // unit of time (default: ms)
-}
-
-func constDelay() int64 {
 }
 
 func NewRandomDelay(unit, dist string, params ...float64) *RandomDelay {
@@ -25,7 +21,7 @@ func NewRandomDelay(unit, dist string, params ...float64) *RandomDelay {
 		if len(params) > 0 {
 			lambda := params[0]
 		}
-		ret.rgen = dst.PoissonNext(lambda)
+		ret.rgen = dst.Poisson(lambda)
 	case "const":
 		d := 500.0
 		if len(params) > 0 {
