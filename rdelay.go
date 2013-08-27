@@ -7,13 +7,17 @@ import (
 	"time"
 )
 
-type RandomDelay struct {
+type Sleeper interface {
+	Sleep() error
+}
+
+type randomDelay struct {
 	rgen func() int64 // random number generator
 	unit string       // unit of time (default: ms)
 }
 
-func NewRandomDelay(unit, dist string, params ...float64) *RandomDelay {
-	ret := new(RandomDelay)
+func NewRandomDelay(unit, dist string, params ...float64) Sleeper {
+	ret := new(randomDelay)
 	ret.unit = unit
 	switch strings.ToLower(dist) {
 	case "poisson":
@@ -34,7 +38,7 @@ func NewRandomDelay(unit, dist string, params ...float64) *RandomDelay {
 	return ret
 }
 
-func (self *RandomDelay) Delay() error {
+func (self *randomDelay) Sleep() error {
 	t := int64(100)
 	if self.rgen != nil {
 		t = self.rgen()

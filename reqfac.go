@@ -14,13 +14,17 @@ type RequestBodyVars struct {
 	Now time.Time
 }
 
-type RequestFactory struct {
+type RequestFactory interface {
+	NewRequest(method, url string, body io.Reader) (*http.Request, error)
+}
+
+type reqFactory struct {
 	template *template.Template
 	nextId   int32
 }
 
-func NewRequestFactory(tmpl string) (*RequestFactory, error) {
-	fac := new(RequestFactory)
+func NewRequestFactory(tmpl string) (*reqFactory, error) {
+	fac := new(reqFactory)
 	if len(tmpl) > 0 {
 		var err error
 		fac.template, err = template.New("reqfactmpl").Parse(tmpl)
@@ -31,8 +35,8 @@ func NewRequestFactory(tmpl string) (*RequestFactory, error) {
 	return fac, nil
 }
 
-func NewRequestFactoryFromFile(fn string) (*RequestFactory, error) {
-	fac := new(RequestFactory)
+func NewRequestFactoryFromFile(fn string) (RequestFactory, error) {
+	fac := new(reqFactory)
 	if len(fn) > 0 {
 		var err error
 		fac.template, err = template.New("reqfactmpl").ParseFiles(fn)
@@ -43,7 +47,7 @@ func NewRequestFactoryFromFile(fn string) (*RequestFactory, error) {
 	return fac, nil
 }
 
-func (self *RequestFactory) NewRequest(method, url string, body io.Reader) (req *http.Request, err error) {
+func (self *reqFactory) NewRequest(method, url string, body io.Reader) (req *http.Request, err error) {
 	if body == nil && self.template != nil {
 		vars := new(RequestBodyVars)
 		vars.Now = time.Now()
