@@ -1,0 +1,9 @@
+url: http://127.0.0.1:8080
+method: GET
+template: {"id":"{{.Id}}", "sites":[{"addr":"http://127.0.0.1:8080","service-time":"500ms"}]}
+
+client1:
+ distribution: exp
+ parameters:
+  - 1.0
+ max-number-of-request: 100
