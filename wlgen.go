@@ -12,16 +12,19 @@ type WorkLoadGenerator struct {
 	maxDuration time.Duration
 	sleeper     Sleeper
 	reqfac      RequestFactory
+	firstWait   time.Duration
 }
 
 func NewWorkLoadGenerator(maxNrReq int,
 	maxDuration time.Duration,
+	firstWait time.Duration,
 	sleeper Sleeper,
 	reqfac RequestFactory) *WorkLoadGenerator {
 
 	ret := &WorkLoadGenerator{
 		maxNrReq:    maxNrReq,
 		maxDuration: maxDuration,
+		firstWait:   firstWait,
 		sleeper:     sleeper,
 		reqfac:      reqfac,
 	}
@@ -48,8 +51,8 @@ func (self *WorkLoadGenerator) Start(method, url string, resChan chan<- *Respons
 	client := &http.Client{Transport: transport}
 
 	wg := &sync.WaitGroup{}
+	time.Sleep(self.firstWait)
 	for i := 0; i < self.maxNrReq || self.maxNrReq <= 0; i++ {
-		self.sleeper.Sleep()
 		if !deadline.IsZero() && time.Now().After(deadline) {
 			break
 		}
@@ -68,6 +71,7 @@ func (self *WorkLoadGenerator) Start(method, url string, resChan chan<- *Respons
 			}
 			resChan <- respInfo
 		}()
+		self.sleeper.Sleep()
 	}
 	wg.Wait()
 }

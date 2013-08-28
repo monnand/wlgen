@@ -13,6 +13,7 @@ type ClientProfile struct {
 	Parameters   []float64
 	MaxNrReq     int
 	MaxDuration  time.Duration
+	FirstWait    time.Duration
 }
 
 type Profile struct {
@@ -121,6 +122,12 @@ func parseClientProfile(clientName string, node yaml.Node) (*ClientProfile, erro
 			prof.MaxDuration, err = parseDuration(d)
 			if err != nil {
 				return nil, fmt.Errorf("client %v's max duration error: %v", clientName, err)
+			}
+		}
+		if w, ok := kv["wait-for"]; ok {
+			prof.FirstWait, err = parseDuration(w)
+			if err != nil {
+				return nil, fmt.Errorf("client %v's wait-for error: %v", clientName, err)
 			}
 		}
 		return prof, nil

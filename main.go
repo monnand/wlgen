@@ -55,7 +55,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "client %v: %v\n", client.Name, err)
 			return
 		}
-		wlg := NewWorkLoadGenerator(client.MaxNrReq, client.MaxDuration, sleeper, reqfac)
+		wlg := NewWorkLoadGenerator(client.MaxNrReq, client.MaxDuration, client.FirstWait, sleeper, reqfac)
 		wg.Add(1)
 		go func() {
 			wlg.Start(profile.Method, profile.URL, ch)
