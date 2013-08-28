@@ -23,7 +23,7 @@ func main() {
 
 	output := os.Stdout
 	if len(*argvOutput) > 0 {
-		output, err = os.Open(*argvOutput)
+		output, err = os.Create(*argvOutput)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 			return

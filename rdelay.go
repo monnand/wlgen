@@ -23,13 +23,13 @@ func NewRandomDelay(unit, dist string, params ...float64) (Sleeper, error) {
 	case "poisson":
 		fallthrough
 	case "exp":
-		lambda := 500.0
+		lambda := 0.5
 		if len(params) > 0 {
 			lambda = params[0]
 		}
 		ret.rgen = dst.Exponential(lambda)
 	case "const":
-		d := 500.0
+		d := 0.5
 		if len(params) > 0 {
 			d = params[0]
 		}
