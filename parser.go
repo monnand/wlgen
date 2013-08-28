@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"github.com/kylelemons/go-gypsy/yaml"
 	"strconv"
+	"time"
 )
 
 type ClientProfile struct {
 	Name         string
 	Distribution string
 	Parameters   []float64
+	MaxNrReq     int
+	MaxDuration  time.Duration
 }
 
 type Profile struct {
@@ -18,6 +21,25 @@ type Profile struct {
 	Template string
 
 	Clients []*ClientProfile
+}
+
+func parseDuration(node yaml.Node) (t time.Duration, err error) {
+	if scalar, ok := node.(yaml.Scalar); ok {
+		t, err = time.ParseDuration(string(scalar))
+	} else {
+		err = fmt.Errorf("duration should be a scalar")
+	}
+	return
+}
+
+func parseInt(node yaml.Node) (n int, err error) {
+	if scalar, ok := node.(yaml.Scalar); ok {
+		str := string(scalar)
+		n, err = strconv.Atoi(str)
+	} else {
+		err = fmt.Errorf("Not a scalar")
+	}
+	return
 }
 
 func parseString(node yaml.Node) (str string, err error) {
@@ -79,6 +101,20 @@ func parseClientProfile(clientName string, node yaml.Node) (*ClientProfile, erro
 				return nil, fmt.Errorf("client %v's parameter error: %v", clientName, err)
 			}
 		}
+
+		if n, ok := kv["max-number-of-request"]; ok {
+			prof.MaxNrReq, err = parseInt(n)
+			if err != nil {
+				return nil, fmt.Errorf("client %v's max number of request error: %v", clientName, err)
+			}
+		}
+
+		if d, ok := kv["max-duration"]; ok {
+			prof.MaxDuration, err = parseDuration(d)
+			if err != nil {
+				return nil, fmt.Errorf("client %v's max duration error: %v", clientName, err)
+			}
+		}
 		return prof, nil
 	}
 	return nil, fmt.Errorf("client %v's profile should be a map", clientName)
@@ -132,4 +168,13 @@ func ParseProfile(node yaml.Node) (p *Profile, err error) {
 		err = fmt.Errorf("no client")
 	}
 	return
+}
+
+func ParseProfileFile(filename string) (*Profile, error) {
+	file, err := yaml.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	root := file.Root
+	return ParseProfile(root)
 }
