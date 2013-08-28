@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/mreiferson/go-httpclient"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -40,23 +41,31 @@ func (self *WorkLoadGenerator) Start(method, url string, resChan chan<- *Respons
 	}
 
 	transport := &httpclient.Transport{
-		ConnectTimeout: 1 * time.Second,
+		ConnectTimeout: 10 * time.Second,
 	}
 	defer transport.Close()
 
 	client := &http.Client{Transport: transport}
+
+	wg := &sync.WaitGroup{}
 	for i := 0; i < self.maxNrReq || self.maxNrReq <= 0; i++ {
 		self.sleeper.Sleep()
 		if !deadline.IsZero() && time.Now().After(deadline) {
 			break
 		}
-		respInfo := new(ResponseInfo)
-		req, err := self.reqfac.NewRequest(method, url, nil)
-		if err != nil {
-			respInfo.Error = err
-		} else {
-			respInfo.Response, respInfo.Error = client.Do(req)
-		}
-		resChan <- respInfo
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			respInfo := new(ResponseInfo)
+			req, err := self.reqfac.NewRequest(method, url, nil)
+			if err != nil {
+				respInfo.Error = err
+			} else {
+				respInfo.Response, respInfo.Error = client.Do(req)
+			}
+			resChan <- respInfo
+		}()
 	}
+	wg.Wait()
 }
