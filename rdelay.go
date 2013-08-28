@@ -16,7 +16,7 @@ type randomDelay struct {
 	unit string         // unit of time (default: second)
 }
 
-func NewRandomDelay(unit, dist string, params ...float64) Sleeper {
+func NewRandomDelay(unit, dist string, params ...float64) (Sleeper, error) {
 	ret := new(randomDelay)
 	ret.unit = unit
 	switch strings.ToLower(dist) {
@@ -36,8 +36,10 @@ func NewRandomDelay(unit, dist string, params ...float64) Sleeper {
 		ret.rgen = func() float64 {
 			return d
 		}
+	default:
+		return nil, fmt.Errorf("unknown distribution type")
 	}
-	return ret
+	return ret, nil
 }
 
 func (self *randomDelay) Sleep() error {
