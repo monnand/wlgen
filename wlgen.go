@@ -62,7 +62,9 @@ func (self *WorkLoadGenerator) Start(method, url string, resChan chan<- *Respons
 			if err != nil {
 				respInfo.Error = err
 			} else {
+				start := time.Now()
 				respInfo.Response, respInfo.Error = client.Do(req)
+				respInfo.Duration = time.Since(start)
 			}
 			resChan <- respInfo
 		}()

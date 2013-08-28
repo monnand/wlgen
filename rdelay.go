@@ -50,7 +50,7 @@ func (self *randomDelay) Sleep() error {
 	if len(self.unit) == 0 {
 		self.unit = "s"
 	}
-	d, err := time.ParseDuration(fmt.Sprint("%v%v", t, self.unit))
+	d, err := time.ParseDuration(fmt.Sprintf("%v%v", t, self.unit))
 	if err != nil {
 		return err
 	}

@@ -53,13 +53,12 @@ func (self *reqFactory) NewRequest(method, url string, body io.Reader) (req *htt
 		vars.Now = time.Now()
 		vars.Id = atomic.AddInt32(&self.nextId, 1)
 
-		buf := new(bytes.Buffer)
+		buf := &bytes.Buffer{}
 		err = self.template.Execute(buf, vars)
 		if err != nil {
 			return
 		}
-		buf.Reset()
-		body = buf
+		body = bytes.NewBuffer(buf.Bytes())
 	}
 	return http.NewRequest(method, url, body)
 }
