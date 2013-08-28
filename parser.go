@@ -23,6 +23,14 @@ type Profile struct {
 	Clients []*ClientProfile
 }
 
+func (self *ClientProfile) GenerateSleeper() (Sleeper, error) {
+	return NewRandomDelay("s", self.Distribution, self.Parameters...)
+}
+
+func (self *Profile) GenerateRequestFactory() (RequestFactory, error) {
+	return NewRequestFactory(self.Template)
+}
+
 func parseDuration(node yaml.Node) (t time.Duration, err error) {
 	if scalar, ok := node.(yaml.Scalar); ok {
 		t, err = time.ParseDuration(string(scalar))
